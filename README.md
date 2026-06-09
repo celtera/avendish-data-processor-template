@@ -12,8 +12,10 @@ It is the message-processing counterpart of the
 
 ## What gets built
 
-The `avnd_make_object(...)` macro in `CMakeLists.txt` instantiates the object back-ends —
-deliberately **not** the audio plug-in formats (VST3 / CLAP / …):
+The `avnd_addon_object(... CATEGORY object)` call in `CMakeLists.txt` instantiates the
+object back-ends — deliberately **not** the audio plug-in formats (VST3 / CLAP / …).
+The same `CMakeLists.txt` also builds as an ossia/score add-on (ossia back-end only) when
+dropped into score, because it resolves Avendish via `find_package(Avendish)`:
 
 | Back-end | Object kind | SDK required |
 |---|---|---|
