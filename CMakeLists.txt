@@ -10,7 +10,7 @@ if(NOT Avendish_FOUND)
   FetchContent_Declare(
     Avendish
     GIT_REPOSITORY "https://github.com/celtera/avendish"
-    GIT_TAG 7f7dac9)
+    GIT_TAG 0f706ab)
   FetchContent_Populate(Avendish)
   list(APPEND CMAKE_PREFIX_PATH "${avendish_SOURCE_DIR}")
   find_package(Avendish REQUIRED)
@@ -25,6 +25,10 @@ avnd_addon_object(
   BASE MyData
   C_NAME my_data_processor
   CLASS MyDataProcessor
+  # Explicit back-end list (the object-category set) including dump — the
+  # plain-C++ introspection target the portability CI builds.
+  BACKENDS dump ossia python pd max standalone wasm example_host
+           touchdesigner:CHOP_MESSAGE godot:NODE
   MAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/Processor.hpp"
   SOURCES
     src/Model.cpp
