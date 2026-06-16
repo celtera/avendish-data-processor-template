@@ -1,31 +1,38 @@
-cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
 
 project(MyData CXX)
 
-include(dependencies.cmake)
-
-add_library(MyDataProcessor STATIC
-  src/Model.cpp
-  src/Model.hpp
-  src/Processor.hpp
-)
-
-# avnd_make_object instantiates the data / message back-ends (no audio plug-in
-# formats): ossia, Max/MSP, Pure Data, Python, TouchDesigner (CHOP message), Godot.
-# Back-ends whose SDK is not found are silently skipped.
-avnd_make_object(
-  TARGET MyDataProcessor
-  MAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/Processor.hpp"
-  MAIN_CLASS MyDataProcessor
-  C_NAME my_data_processor
-)
-
-# Workaround: when godot-cpp is pulled in via FetchContent, its only targets are
-# `godot-cpp` (+ alias `godot::cpp`) — there is no `godot-cpp::godot-cpp`. Avendish's
-# avnd_make_godot doesn't always resolve the target, so the generated headers under
-# <godot-cpp-build>/gen/include never make it onto the GDExtension's include path and
-# compilation fails with "godot_cpp/classes/node.hpp not found". Re-linking the target
-# here (at a scope where it is visible) propagates godot-cpp's PUBLIC include dirs.
-if(TARGET MyDataProcessor_NODE_godot AND TARGET godot-cpp)
-  target_link_libraries(MyDataProcessor_NODE_godot PRIVATE godot-cpp)
+# Use the Avendish the host already provides (e.g. ossia score); otherwise fetch it.
+# The same CMakeLists builds this as an ossia/score add-on or as a standalone object.
+find_package(Avendish QUIET)
+if(NOT Avendish_FOUND)
+  include(FetchContent)
+  FetchContent_Declare(
+    Avendish
+    GIT_REPOSITORY "https://github.com/celtera/avendish"
+    GIT_TAG 6dacc12)
+  FetchContent_Populate(Avendish)
+  list(APPEND CMAKE_PREFIX_PATH "${avendish_SOURCE_DIR}")
+  find_package(Avendish REQUIRED)
 endif()
+
+avnd_addon_init(NAME MyData)
+
+# CATEGORY object: the data / message back-ends (no audio plug-in formats) -- ossia,
+# Max/MSP, Pure Data, Python, TouchDesigner (CHOP message), Godot. In a score build only
+# the ossia process is produced. Back-ends whose SDK is absent are silently skipped.
+avnd_addon_object(
+  BASE MyData
+  C_NAME my_data_processor
+  CLASS MyDataProcessor
+  # Explicit back-end list (the object-category set) including dump — the
+  # plain-C++ introspection target the portability CI builds.
+  BACKENDS dump ossia python pd max standalone wasm example_host
+           touchdesigner:CHOP_MESSAGE godot:NODE
+  MAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/src/Processor.hpp"
+  SOURCES
+    src/Model.cpp
+    src/Model.hpp
+    src/Processor.hpp)
+
+avnd_addon_finalize(NAME MyData UUID d589bb28-5055-4758-9236-00747b31a41d VERSION 1.0.0)
