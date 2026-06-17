@@ -35,4 +35,4 @@ avnd_addon_object(
     src/Model.hpp
     src/Processor.hpp)
 
-avnd_addon_finalize(NAME MyData UUID d589bb28-5055-4758-9236-00747b31a41d VERSION 1.0.0)
+avnd_addon_finalize(NAME MyData UUID d589bb28-5055-4758-9236-00747b31a41d VERSION 1)
