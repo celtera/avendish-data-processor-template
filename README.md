@@ -1,5 +1,7 @@
 # Avendish data / message object template
 
+[![Build](https://github.com/celtera/avendish-data-processor-template/actions/workflows/builds.yaml/badge.svg)](https://github.com/celtera/avendish-data-processor-template/actions/workflows/builds.yaml)
+
 A canonical template for making **data / message** objects with
 [Avendish](https://github.com/celtera/avendish): a single C++ object that processes
 strings (and other non-audio data) and is compiled, without rewrite, to the host formats
